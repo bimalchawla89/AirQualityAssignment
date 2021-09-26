@@ -46,9 +46,18 @@ class ChartFragment : Fragment(R.layout.fragment_chart) {
     private fun updateChart(list: List<AirQuality>) {
         val dataPoints = mutableListOf<Entry>()
         var count = 1
+        var previousTime = 0L
         for (item in list) {
-            dataPoints.add(Entry(count.toFloat(), item.aqiValue?.toFloat() ?: 0f))
-            count++
+            if (previousTime == 0L) {
+                previousTime = item.time!!
+                dataPoints.add(Entry(count.toFloat(), item.aqiValue?.toFloat() ?: 0f))
+                count++
+            }
+            if (dataPoints.isNotEmpty() && (item.time?.minus(previousTime))!! > 30000) {
+                previousTime = item.time!!
+                dataPoints.add(Entry(count.toFloat(), item.aqiValue?.toFloat() ?: 0f))
+                count++
+            }
         }
 
         val dataset = LineDataSet(dataPoints, city)
